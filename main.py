@@ -21,12 +21,12 @@ def background_task():
     time.sleep(10)  # Wait for 10 seconds
     print("Task completed!")
 
-@app.get("/")
+@app.get("/gptengine/")
 def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/task")
+@app.get("gptengine/task")
 def test_task():
     job = queue.enqueue(background_task)
     print(job)
