@@ -26,7 +26,7 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.get("gptengine/task")
+@app.get("/gptengine/task")
 def test_task():
     job = queue.enqueue(background_task)
     print(job)
