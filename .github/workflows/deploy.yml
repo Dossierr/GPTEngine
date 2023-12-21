@@ -1,0 +1,54 @@
+name: 🚀  Deployment
+# Only trigger, when the build workflow succeeded
+on:
+  push:
+    branches: [ "main" ]
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  AWS_LIGHTSAIL_SERVICE_NAME: dossierr
+  #AWS_LIGHTSAIL_SERVICE_NAME: ${{ secrets.AWS_SERVICE_NAME }}
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+jobs:
+
+  gptengine:
+    name: 🌎 building gptengine service
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🗂  Getting code from Github
+        uses: actions/checkout@v2
+      - name: ⚙️  Updating to the latest versions
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq unzip
+      - name: 🏢 Install Amazon Client
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install || true
+          aws --version
+          curl "https://s3.us-west-2.amazonaws.com/lightsailctl/latest/linux-amd64/lightsailctl" -o "lightsailctl"
+          sudo mv "lightsailctl" "/usr/local/bin/lightsailctl"
+          sudo chmod +x /usr/local/bin/lightsailctl
+      - name: 🤐 Log in to AWS Lightsail with Secrets
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: 🐳 Create a Docker Container for gptengine
+        run: docker build -t gptengine:latest -f ./dockerfile .
+      - name: 📬 Upload gptengine image to AWS container register
+        run: |
+          service_name=${{ env.AWS_LIGHTSAIL_SERVICE_NAME }}
+          aws lightsail push-container-image \
+            --region ${{ env.AWS_REGION }} \
+            --service-name ${service_name} \
+            --label gptengine \
+            --image gptengine:latest
+      - name: =========== All done. Cleaning up ♻️  ===========
+        run: ls

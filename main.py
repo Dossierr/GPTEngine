@@ -1,11 +1,20 @@
 from fastapi import FastAPI, HTTPException
 from chat_processing import process_query
-from rag import answer_query_with_llm
+#from rag import answer_query_with_llm
 import shutil
 
 
 app = FastAPI()
 
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+
+@app.get("/task")
+def test_task():
+    
+    return {"task": "started"}
 
 @app.post("/query")
 async def post_query(request_data: dict):
@@ -26,7 +35,7 @@ async def post_query(request_data: dict):
     return process_query(query, dossier_id)
 
 
-@app.post("/query2")
+"""@app.post("/query2")
 async def post_query(request_data: dict):
     dossier_id = request_data.get("dossier_id")
     query = request_data.get("query")
@@ -34,7 +43,7 @@ async def post_query(request_data: dict):
     if not dossier_id or not query:
         raise HTTPException(status_code=400, detail="Both dossier_id and query are required.")
 
-    return answer_query_with_llm(dossier_id,query)
+    return answer_query_with_llm(dossier_id,query)"""
 
     
 @app.post("/reindex_dossier/{folder_path}")
