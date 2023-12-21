@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from chat_processing import process_query
+#from chat_processing import process_query
 #from rag import answer_query_with_llm
 import shutil
 from rq import Queue
@@ -10,7 +10,7 @@ import time
 app = FastAPI()
 
 # Set up Redis connection
-redis_conn = Redis(host='your-redis-host', port=6379, db=0)
+redis_conn = Redis(host='redis://localhost', port=6379, db=0)
 
 # Set up RQ queue
 queue = Queue(connection=redis_conn)
