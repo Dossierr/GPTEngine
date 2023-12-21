@@ -10,7 +10,7 @@ import time
 app = FastAPI()
 
 # Set up Redis connection
-redis_conn = Redis(host='redis://localhost', port=6379, db=0)
+redis_conn = Redis(host='localhost', port=6379, db=0)
 
 # Set up RQ queue
 queue = Queue(connection=redis_conn)
@@ -26,7 +26,7 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/gptengine/task")
+@app.get("/gptengine/task/")
 def test_task():
     job = queue.enqueue(background_task)
     print(job)
