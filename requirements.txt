@@ -1,3 +1,6 @@
 fastapi
 environ
 langchain
+uvicorn
+python-rq
+redis

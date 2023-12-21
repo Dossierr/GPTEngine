@@ -2,9 +2,24 @@ from fastapi import FastAPI, HTTPException
 from chat_processing import process_query
 #from rag import answer_query_with_llm
 import shutil
+from rq import Queue
+from redis import Redis
+import time
 
 
 app = FastAPI()
+
+# Set up Redis connection
+redis_conn = Redis(host='your-redis-host', port=6379, db=0)
+
+# Set up RQ queue
+queue = Queue(connection=redis_conn)
+
+def background_task():
+    # Your background task logic here
+    print("Task started...")
+    time.sleep(10)  # Wait for 10 seconds
+    print("Task completed!")
 
 @app.get("/")
 def read_root():
@@ -13,8 +28,9 @@ def read_root():
 
 @app.get("/task")
 def test_task():
-    
-    return {"task": "started"}
+    job = queue.enqueue(background_task)
+    print(job)
+    return {"message": f"Task {job.id} enqueued successfully!"}
 
 @app.post("/query")
 async def post_query(request_data: dict):
