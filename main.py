@@ -30,7 +30,7 @@ def read_root():
 def test_task():
     job = queue.enqueue(background_task)
     print(job)
-    return {"message": f"Task {job.id} enqueued successfully!"}
+    return {"message enqueued: ": job.id }
 
 @app.post("/query")
 async def post_query(request_data: dict):
