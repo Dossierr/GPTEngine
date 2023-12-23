@@ -1,11 +1,15 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter
 from chat_processing import process_query
 import shutil
 from rq import Queue
 from redis import Redis
 import time
 
-app = FastAPI(root_path="/q")
+router = APIRouter()
+
+
+app = FastAPI()
+
 
 # Set up Redis connection
 redis_conn = Redis(host='localhost', port=6379, db=0)
@@ -19,18 +23,18 @@ def background_task():
     time.sleep(10)  # Wait for 10 seconds
     print("Task completed!")
 
-@app.get("/")
+@app.get("/q/")
 def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/task/")
+@app.get("/q/task/")
 def test_task():
     job = queue.enqueue(background_task)
     print(job)
     return {"message enqueued: ": job.id }
 
-@app.post("/query")
+@app.post("/q/query")
 async def post_query(request_data: dict):
     """ Example cURL call:
     curl --location 'http://localhost:8000/query' \
@@ -48,19 +52,8 @@ async def post_query(request_data: dict):
 
     return process_query(query, dossier_id)
 
-
-"""@app.post("/query2")
-async def post_query(request_data: dict):
-    dossier_id = request_data.get("dossier_id")
-    query = request_data.get("query")
-
-    if not dossier_id or not query:
-        raise HTTPException(status_code=400, detail="Both dossier_id and query are required.")
-
-    return answer_query_with_llm(dossier_id,query)"""
-
     
-@app.post("/reindex_dossier/{folder_path}")
+@app.post("/q/reindex_dossier/{folder_path}")
 async def remove_folder(folder_path: str):
     """
     curl -X POST http://localhost:8000/remove_folder/my_folder
