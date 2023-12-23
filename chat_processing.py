@@ -13,21 +13,15 @@ import redis
 import environ
 from langchain.vectorstores import Chroma
 from langchain.memory import RedisChatMessageHistory
-import constants
+
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
 
 # Create an instance of InMemoryCache
 llm_cache = InMemoryCache()
 set_llm_cache(llm_cache)
-
-
-#Grab ENV variables we'll need
-os.environ["OPENAI_API_KEY"] = constants.OPENAI_API_KEY
-os.environ["S3_AWS_ACCESS_KEY_ID"] = constants.S3_AWS_ACCESS_KEY_ID
-os.environ["S3_AWS_SECRET_KEY"] = constants.S3_AWS_SECRET_KEY
-os.environ["REDIS_PASSWORD"] = constants.REDIS_PASSWORD
-os.environ["REDIS_URL"] = constants.REDIS_URL
-env = environ.Env()
-environ.Env.read_env()
 
 r = redis.Redis(
   host='redis-15281.c300.eu-central-1-1.ec2.cloud.redislabs.com',

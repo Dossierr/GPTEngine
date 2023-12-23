@@ -48,7 +48,7 @@ jobs:
           envkey_S3_AWS_SECRET_KEY: ${{ secrets.S3_AWS_SECRET_KEY }}
           envkey_REDIS_URL: ${{ secrets.REDIS_URL }}
           envkey_REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-          file_name: constants.py
+          file_name: .env
           fail_on_empty: false
       - name: 🐳 Create a Docker Container for gptengine
         run: docker build -t gptengine:latest -f ./dockerfile .
