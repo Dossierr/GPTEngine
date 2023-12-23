@@ -5,3 +5,4 @@ uvicorn
 rq
 redis
 openai
+boto3
