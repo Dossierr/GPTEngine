@@ -9,3 +9,4 @@ boto3
 chromadb
 unstructured
 pysqlite3
+tiktoken
