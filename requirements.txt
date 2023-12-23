@@ -4,3 +4,4 @@ langchain
 uvicorn
 rq
 redis
+openai
