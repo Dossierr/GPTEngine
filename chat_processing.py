@@ -7,6 +7,9 @@ from langchain.indexes import VectorstoreIndexCreator
 from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 from langchain.document_loaders import S3DirectoryLoader
 from langchain.cache import InMemoryCache
+from langchain.cache import RedisCache
+from langchain.globals import set_llm_cache
+import redis
 import environ
 from langchain.vectorstores import Chroma
 from langchain.memory import RedisChatMessageHistory
@@ -16,18 +19,28 @@ import constants
 llm_cache = InMemoryCache()
 set_llm_cache(llm_cache)
 
+
 #Grab ENV variables we'll need
 os.environ["OPENAI_API_KEY"] = constants.OPENAI_API_KEY
-os.environ["AWS_ACCESS_KEY_ID"] = constants.AWS_ACCESS_KEY_ID
-os.environ["AWS_SECRET_KEY"] = constants.AWS_SECRET_KEY
+os.environ["S3_AWS_ACCESS_KEY_ID"] = constants.S3_AWS_ACCESS_KEY_ID
+os.environ["S3_AWS_SECRET_KEY"] = constants.S3_AWS_SECRET_KEY
+os.environ["REDIS_PASSWORD"] = constants.REDIS_PASSWORD
 os.environ["REDIS_URL"] = constants.REDIS_URL
 env = environ.Env()
 environ.Env.read_env()
 
+r = redis.Redis(
+  host='redis-15281.c300.eu-central-1-1.ec2.cloud.redislabs.com',
+  port=15281,
+  password=env('REDIS_PASSWORD'),
+  decode_responses=True)
+
+#Uses Redis as cache for frequent queries witha time to live
+set_llm_cache(RedisCache(r, ttl=60*60))
+
   
 def process_query(query, dossier_id):  
     PERSIST = True #Persists data 
-    #chat_history = ChatMessageHistory()
     chat_history = RedisChatMessageHistory(
         url=env('REDIS_URL'),
         session_id='-history',

@@ -1,13 +1,11 @@
 from fastapi import FastAPI, HTTPException
-#from chat_processing import process_query
-#from rag import answer_query_with_llm
+from chat_processing import process_query
 import shutil
 from rq import Queue
 from redis import Redis
 import time
 
-
-app = FastAPI()
+app = FastAPI(root_path="/q")
 
 # Set up Redis connection
 redis_conn = Redis(host='localhost', port=6379, db=0)
@@ -21,12 +19,12 @@ def background_task():
     time.sleep(10)  # Wait for 10 seconds
     print("Task completed!")
 
-@app.get("/gptengine/")
+@app.get("/")
 def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/gptengine/task/")
+@app.get("/task/")
 def test_task():
     job = queue.enqueue(background_task)
     print(job)

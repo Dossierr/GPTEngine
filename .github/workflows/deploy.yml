@@ -40,6 +40,16 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: 🤐 Make envfile
+          uses: SpicyPizza/create-envfile@v1.3
+          with:
+            envkey_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+            envkey_S3_AWS_ACCESS_KEY_ID: ${{ secrets.S3_AWS_ACCESS_KEY_ID }}
+            envkey_S3_AWS_SECRET_KEY: ${{ secrets.S3_AWS_SECRET_KEY }}
+            envkey_REDIS_URL: ${{ secrets.REDIS_URL }}
+            envkey_REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+            file_name: constants.py
+            fail_on_empty: false
       - name: 🐳 Create a Docker Container for gptengine
         run: docker build -t gptengine:latest -f ./dockerfile .
       - name: 📬 Upload gptengine image to AWS container register
