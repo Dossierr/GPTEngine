@@ -48,8 +48,8 @@ def process_query(query, dossier_id):
     else:
         # No folder exists or we don't want to use it.
         s3_folder_path = str(dossier_id)
-        loader = S3DirectoryLoader("dossierr", prefix=s3_folder_path, aws_access_key_id=env('AWS_ACCESS_KEY_ID'),
-                               aws_secret_access_key=env('AWS_SECRET_KEY'))
+        loader = S3DirectoryLoader("dossierr", prefix=s3_folder_path, aws_access_key_id=env('S3_AWS_ACCESS_KEY_ID'),
+                               aws_secret_access_key=env('S3_AWS_SECRET_KEY'))
         if PERSIST:
             #We reuse a index if it alreaady exists
             index = VectorstoreIndexCreator(vectorstore_kwargs={"persist_directory":"persist/"+dossier_id}).from_loaders([loader])
