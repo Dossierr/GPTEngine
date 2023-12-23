@@ -55,7 +55,8 @@ def process_query(query, dossier_id):
     chain = ConversationalRetrievalChain.from_llm(
         llm=ChatOpenAI(
         model="gpt-3.5-turbo",
-        cache=True, temperature=1.3), 
+        cache=True, 
+        temperature=1.3), 
         return_source_documents=True,
         # See documentation on retrievers: https://python.langchain.com/docs/modules/data_connection/retrievers/vectorstore 
         retriever=index.vectorstore.as_retriever(search_kwargs={"k": 3}),
@@ -69,4 +70,4 @@ def process_query(query, dossier_id):
             source_list.append(source_name)
     chat_history.add_user_message(query)
     chat_history.add_ai_message(result['answer'])
-    return {'answer': result['answer'], 'sources':source_list}
+    return {'chat': chat_history.messages, 'sources':source_list}
