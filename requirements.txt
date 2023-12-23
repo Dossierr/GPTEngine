@@ -8,3 +8,4 @@ openai
 boto3
 chromadb
 unstructured
+pysqlite3

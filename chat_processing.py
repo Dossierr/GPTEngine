@@ -17,6 +17,14 @@ from langchain.memory import RedisChatMessageHistory
 env = environ.Env()
 environ.Env.read_env()
 
+try: 
+    __import__('pysqlite3')
+    import sys
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+    import sqlite3
+except:
+    print("local computer")
+
 # Create an instance of InMemoryCache
 llm_cache = InMemoryCache()
 set_llm_cache(llm_cache)
