@@ -6,3 +6,4 @@ rq
 redis
 openai
 boto3
+chromadb
