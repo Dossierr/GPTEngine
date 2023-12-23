@@ -2,8 +2,12 @@ from fastapi import FastAPI, HTTPException, APIRouter
 from chat_processing import process_query
 import shutil
 from rq import Queue
-from redis import Redis
+import redis
 import time
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
 
 router = APIRouter()
 
@@ -12,7 +16,13 @@ app = FastAPI()
 
 
 # Set up Redis connection
-redis_conn = Redis(host='localhost', port=6379, db=0)
+#redis_conn = Redis(host='localhost', port=6379, db=0)
+redis_conn = redis.Redis(
+  host='redis-15281.c300.eu-central-1-1.ec2.cloud.redislabs.com',
+  port=15281,
+  password=env('REDIS_PASSWORD'),
+  decode_responses=True,
+  )
 
 # Set up RQ queue
 queue = Queue(connection=redis_conn)

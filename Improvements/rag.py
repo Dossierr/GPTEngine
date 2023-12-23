@@ -36,8 +36,8 @@ environ.Env.read_env()
 os.environ["REDIS_URL"] = constants.REDIS_URL
 os.environ["OPENAI_API_KEY"] = constants.OPENAI_API_KEY
 os.environ["REDIS_PASSWORD"] = constants.REDIS_PASSWORD
-os.environ["AWS_ACCESS_KEY_ID"] = constants.AWS_ACCESS_KEY_ID
-os.environ["AWS_SECRET_KEY"] = constants.AWS_SECRET_KEY
+os.environ["S3_AWS_ACCESS_KEY_ID"] = constants.S3_AWS_ACCESS_KEY_ID
+os.environ["S3_AWS_SECRET_KEY"] = constants.S3_AWS_SECRET_KEY
 openai.api_key = env("OPENAI_API_KEY")
 
 #Creating a Redis Instance
@@ -75,15 +75,15 @@ def create_index(vector_dimensions: int, dossier_id: str):
         definition = IndexDefinition(prefix=[dossier_id], index_type=IndexType.HASH)
 
         # create Index
-        r.ft(dossier_id).create_index(fields=schema, definition=definition)
+        return r.ft(dossier_id).create_index(fields=schema, definition=definition)
 
 
 def indexing_folder(dosier_id):
     #Loading S3 bucket
     loader = S3DirectoryLoader("dossierr", 
                                prefix=dosier_id, 
-                               aws_access_key_id=env('AWS_ACCESS_KEY_ID'),
-                               aws_secret_access_key=env('AWS_SECRET_KEY'),
+                               aws_access_key_id=env('S3_AWS_ACCESS_KEY_ID'),
+                               aws_secret_access_key=env('S3_AWS_SECRET_KEY'),
                                )
     
     docs = loader.load()
@@ -116,7 +116,7 @@ def indexing_folder(dosier_id):
     return None
 
 
-def retrieve_documents(dossier_id, query):  
+"""def retrieve_documents(dossier_id, query):  
     # create query embedding
     response = openai.Embedding.create(input=[query], engine="text-embedding-ada-002")
     query_embedding = np.array([r["embedding"] for r in response["data"]], dtype=np.float32)[0]
@@ -143,9 +143,9 @@ def retrieve_documents(dossier_id, query):
         source = getattr(document, "document", "No source available")
         source = source.split("/")[-1] #just the file name
         sources.append(source)
-    return response, sources
+    return response, sources"""
 
-def answer_query_with_llm(dossier_id, query):
+"""def answer_query_with_llm(dossier_id, query):
     #Finding a place to store the history
     chat_history = RedisChatMessageHistory(
             url=env('REDIS_URL'),
@@ -161,8 +161,8 @@ def answer_query_with_llm(dossier_id, query):
             metadata={'sources': sources[i]}  # Use the index to get the corresponding source
         )
         docs.append(document)
-    
-    """doc_prompt = PromptTemplate.from_template("{page_content}")
+    """
+"""doc_prompt = PromptTemplate.from_template("{page_content}")
     chain = (
         {
             "content": lambda docs: "\n\n".join(
@@ -179,7 +179,7 @@ def answer_query_with_llm(dossier_id, query):
     chat_history.add_ai_message(result)
     print(result)"""
     
-    ### NEW SECTION
+"""    ### NEW SECTION
     from langchain.prompts import PromptTemplate
     from langchain.chains import LLMChain
 
@@ -219,7 +219,7 @@ query = 'Wat zegt de VVD over klimaat? '
 result = answer_query_with_llm(DOSSIER_ID, query)
 
 
-
+"""
 
 
 
