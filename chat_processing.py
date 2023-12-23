@@ -14,8 +14,6 @@ import environ
 from langchain.vectorstores import Chroma
 from langchain.memory import RedisChatMessageHistory
 
-import environ
-
 env = environ.Env()
 environ.Env.read_env()
 
