@@ -61,8 +61,9 @@ def process_query(query, dossier_id):
         # See documentation on retrievers: https://python.langchain.com/docs/modules/data_connection/retrievers/vectorstore 
         retriever=index.vectorstore.as_retriever(search_kwargs={"k": 3}),
         )
-
-    result = chain({"question": query, "chat_history": chat_history.messages})
+    #WE take the last 3 messages so we don't exceed the context (In the response we send along all messages)
+    short_history = chat_history.messages[-3:] 
+    result = chain({"question": query, "chat_history": short_history})
     source_list = []
     for source in result["source_documents"]:
         source_name = source.metadata['source'].split("/")[-1]
