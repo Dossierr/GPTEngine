@@ -47,7 +47,7 @@ def test_task():
 @app.post("/q/query")
 async def post_query(request_data: dict):
     """ Example cURL call:
-    curl --location 'http://localhost:8000/query' \
+    curl --location 'http://localhost:8000/q/query' \
         --header 'Content-Type: application/json' \
         --data '{
             "dossier_id": "testfolder",

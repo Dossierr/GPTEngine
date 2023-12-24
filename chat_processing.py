@@ -43,7 +43,7 @@ def process_query(query, dossier_id):
         index = VectorStoreIndexWrapper(vectorstore=vectorstore)
     else:
         # No folder exists or we don't want to use it.
-        s3_folder_path = str(dossier_id)
+        s3_folder_path = 'cases/'+str(dossier_id)
         loader = S3DirectoryLoader("dossierr", prefix=s3_folder_path, aws_access_key_id=env('S3_AWS_ACCESS_KEY_ID'),
                                aws_secret_access_key=env('S3_AWS_SECRET_KEY'))
         if PERSIST:
