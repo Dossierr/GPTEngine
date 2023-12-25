@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, APIRouter
-from chat_processing import process_query
+from chat_processing import process_query, index_files
 import shutil
 from rq import Queue
 import redis
@@ -63,13 +63,14 @@ async def post_query(request_data: dict):
     return process_query(query, dossier_id)
 
     
-@app.post("/q/reindex_dossier/{folder_path}")
-async def remove_folder(folder_path: str):
+@app.post("/q/reindex_dossier/{case_id}")
+async def remove_folder(case_id: str):
     """
     curl -X POST http://localhost:8000/remove_folder/my_folder
     """
     try:
-        shutil.rmtree("persist/"+folder_path)
-        return {"message": f"Folder {folder_path} removed successfully."}
+        shutil.rmtree("persist/"+case_id)
+        index_files(case_id, True)
+        return {"message": f"Folder {case_id} reindexed successfully."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
