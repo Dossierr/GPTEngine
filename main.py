@@ -56,11 +56,12 @@ async def post_query(request_data: dict):
     """
     dossier_id = request_data.get("dossier_id")
     query = request_data.get("query")
+    billing_token = request_data.get("billing-token")
 
     if not dossier_id or not query:
         raise HTTPException(status_code=400, detail="Both dossier_id and query are required.")
 
-    return process_query(query, dossier_id)
+    return process_query(query, dossier_id, billing_token)
 
     
 @app.post("/q/reindex_dossier/{case_id}")

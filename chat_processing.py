@@ -33,7 +33,6 @@ r = redis.Redis(
 queue = Queue(connection=r)
 
 
-# Set up RQ queue
 
 #Uses Redis as cache for frequent queries witha time to live
 set_llm_cache(RedisCache(r, ttl=60*60))
@@ -53,7 +52,7 @@ def index_files(dossier_id, PERSIST):
     return index
 
   
-def process_query(query, dossier_id):  
+def process_query(query, dossier_id, billing_token):  
     PERSIST = True #Persists data 
     chat_history = RedisChatMessageHistory(
         url=env('REDIS_URL'),
@@ -84,7 +83,7 @@ def process_query(query, dossier_id):
     with get_openai_callback() as cb:
         result = chain({"question": query, "chat_history": short_history})
     tokens_used = {'total':cb.total_tokens, 'prompt_and_context':cb.prompt_tokens, 'response':cb.completion_tokens}
-    job = queue.enqueue(bill_tokens, 'dummy_user', cb.total_tokens)
+    job = queue.enqueue(bill_tokens, billing_token, cb.total_tokens)
     source_list = []
     for source in result["source_documents"]:
         source_name = source.metadata['source'].split("/")[-1]
