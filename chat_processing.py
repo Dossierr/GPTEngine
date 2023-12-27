@@ -9,19 +9,31 @@ from langchain.document_loaders import S3DirectoryLoader
 from langchain.cache import InMemoryCache
 from langchain.cache import RedisCache
 from langchain.globals import set_llm_cache
+from langchain.callbacks import get_openai_callback
 import redis
 import environ
 from langchain.vectorstores import Chroma
 from langchain.memory import RedisChatMessageHistory
+from tasks.billing import bill_tokens
+from rq import Queue
+
 
 env = environ.Env()
 environ.Env.read_env()
+
+
+
 
 r = redis.Redis(
   host='redis-15281.c300.eu-central-1-1.ec2.cloud.redislabs.com',
   port=15281,
   password=env('REDIS_PASSWORD'),
   decode_responses=True)
+
+queue = Queue(connection=r)
+
+
+# Set up RQ queue
 
 #Uses Redis as cache for frequent queries witha time to live
 set_llm_cache(RedisCache(r, ttl=60*60))
@@ -68,8 +80,11 @@ def process_query(query, dossier_id):
         retriever=index.vectorstore.as_retriever(search_kwargs={"k": 3}),
         )
     #WE take the last 3 messages so we don't exceed the context (In the response we send along all messages)
-    short_history = chat_history.messages[-3:] 
-    result = chain({"question": query, "chat_history": short_history})
+    short_history = chat_history.messages[-3:]
+    with get_openai_callback() as cb:
+        result = chain({"question": query, "chat_history": short_history})
+    tokens_used = {'total':cb.total_tokens, 'prompt_and_context':cb.prompt_tokens, 'response':cb.completion_tokens}
+    job = queue.enqueue(bill_tokens, 'dummy_user', cb.total_tokens)
     source_list = []
     for source in result["source_documents"]:
         source_name = source.metadata['source'].split("/")[-1]
@@ -77,4 +92,4 @@ def process_query(query, dossier_id):
             source_list.append(source_name)
     chat_history.add_user_message(query)
     chat_history.add_ai_message(result['answer'])
-    return {'chat': chat_history.messages, 'sources':source_list}
+    return {'chat': chat_history.messages, 'sources':source_list, 'tokens':tokens_used}
